@@ -28,15 +28,20 @@
 "COLUMN"    { return COLUMN; }
 "INT"       { return INT; }
 "VARCHAR"   { return VARCHAR; }
-
 "GRANT"     { return GRANT; }
 "REVOKE"    { return REVOKE; }
 "ON"        { return ON; }
 "TO"        { return TO; }
 "ALL"       { return ALL; }
 
+"IS"        { return IS; }
+"NOT"       { return NOT; }
+"NULL"      { return NULL_TOKEN; }
+
 "*"         { return STAR; }
 "="         { return EQ; }
+">"         { return GT; }
+"<"         { return LT; }
 ","         { return COMMA; }
 "("         { return LPAREN; }
 ")"         { return RPAREN; }

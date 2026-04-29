@@ -9,6 +9,7 @@ extern char *yytext;
 void yyerror(const char *s);
 extern int yylex();
 
+/* Fuzzy matching logic remains the same */
 int levenshtein(const char *s1, const char *s2) {
     int len1 = strlen(s1), len2 = strlen(s2);
     int matrix[len1 + 1][len2 + 1];
@@ -47,12 +48,15 @@ const char* find_closest(const char* input) {
 %token SELECT FROM WHERE AND OR INSERT INTO VALUES UPDATE SET DELETE
 %token CREATE TABLE DATABASE DROP ALTER ADD COLUMN INT VARCHAR
 %token GRANT REVOKE ON TO ALL
-%token STAR EQ COMMA LPAREN RPAREN SEMI
+%token IS NOT NULL_TOKEN
+%token STAR EQ GT LT COMMA LPAREN RPAREN SEMI
 %token <str> ID STRING
 %token <num> NUM
 
-%left OR AND
-%left EQ
+%left OR
+%left AND
+%left EQ GT LT
+%left IS NOT
 
 %%
 
@@ -82,10 +86,28 @@ select_stmt : SELECT select_list FROM table_list where_clause ;
 select_list : STAR | column_list ;
 column_list : ID | column_list COMMA ID ;
 table_list  : ID | table_list COMMA ID ;
+
 where_clause : /* empty */ | WHERE condition_list ;
-condition_list : condition | condition_list AND condition | condition_list OR condition ;
-condition : ID EQ value ;
+
+/* Updated to allow parentheses in logic */
+condition_list 
+    : condition 
+    | condition_list AND condition 
+    | condition_list OR condition 
+    | LPAREN condition_list RPAREN 
+    ;
+
+condition 
+    : ID EQ value 
+    | ID GT value           /* For prix > 100 */
+    | ID LT value 
+    | ID IS NOT NULL_TOKEN  /* For stock is not null */
+    | ID IS NULL_TOKEN
+    ;
+
 value : NUM | STRING | ID ;
+
+/* Rest of DML/DDL rules remain the same */
 insert_stmt : INSERT INTO ID LPAREN column_list RPAREN VALUES LPAREN value_list RPAREN | INSERT INTO ID VALUES LPAREN value_list RPAREN ;
 value_list : value | value_list COMMA value ;
 update_stmt : UPDATE ID SET update_list where_clause ;
